@@ -58,7 +58,7 @@ const variables = {
         lat: 51.924491609412,
         lng: -0.487100640539,
         unit: "mi",
-        distance: 200,
+        distance: 30,
       },
       equalFilters: [],
       consolidateSchedule: true,
