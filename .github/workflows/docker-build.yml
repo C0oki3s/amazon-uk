@@ -14,13 +14,13 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Build Docker image
-      run: docker build -t amz .
+      run: docker build -t rohith709370/amz .
 
     - name: Log in to Docker Hub
       run: echo "dckr_pat_M7LxUtwkxzD2KNo9BrIqAo1y7R0" | docker login -u rohith709370 --password-stdin
 
     - name: Push Docker image to Docker Hub
-      run: docker push amz
+      run: docker push rohith709370/amz:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
       run: echo "dckr_pat_M7LxUtwkxzD2KNo9BrIqAo1y7R0" | docker login -u rohith709370 --password-stdin
 
     - name: Pull Docker image from Docker Hub
-      run: docker pull amz
+      run: docker pull rohith709370/amz:latest
 
     - name: Run Docker container
-      run: docker run amz
+      run: docker run rohith709370/amz:latest
