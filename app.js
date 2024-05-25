@@ -138,43 +138,39 @@ const fetchData = async () => {
   }
 };
 
+const main = async () => {
+  const message = await fetchData();
+  if (message.includes("1)")) {
+    var qs = require('qs');
+    var data = qs.stringify({
+      "token": "k0mj5og30kwyy5sh",
+      "to": "120363283707162796@g.us",
+      "body": message,
+      "priority": 10,
+      "referenceId": "",
+      "msgId": "",
+      "mentions": ""
+    });
 
+    var config = {
+      method: 'post',
+      url: 'https://api.ultramsg.com/instance86547/messages/chat',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: data
+    };
 
-const main = async()=>{
-    const message = await fetchData();
-    if(message.includes("1)")){
-        var qs = require('qs');
-        var data = qs.stringify({
-            "token": "k0mj5og30kwyy5sh",
-            "to": "120363283707162796@g.us",
-            "body": message,
-            "priority": 10,
-            "referenceId": "",
-            "msgId": "",
-            "mentions": ""
-        });
-        
-        var config = {
-            method: 'post',
-            url: 'https://api.ultramsg.com/instance86547/messages/chat',
-            headers: {  
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            data : data
-          };
-          
-          axios(config)
-          .then(function (response) {
-            console.log(JSON.stringify(response.data));
-            setTimeout(main, 60000);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-    }else{
-        console.log("No data")
-        setTimeout(main, 60000);
-    }   
+    axios(config)
+      .then(function (response) {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  } else {
+    console.log("No data")
+  }
 }
 
-main()
+main();
