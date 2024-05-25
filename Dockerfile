@@ -11,7 +11,7 @@ RUN npm install
 COPY . .
 
 # Install cron
-RUN apk update && apk add --no-cache cron
+RUN apk update && apk add --no-cache dcron
 
 # Copy the cron job file into the app directory
 COPY cron-job /usr/src/app/cron-job
@@ -26,4 +26,4 @@ RUN crontab /usr/src/app/cron-job
 RUN touch /var/log/cron.log
 
 # Run the command on container startup
-CMD cron && tail -f /var/log/cron.log
+CMD crond && tail -f /var/log/cron.log
