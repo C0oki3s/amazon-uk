@@ -1,5 +1,4 @@
 const axios = require("axios");
-
 const query = `
   query searchJobCardsByLocation($searchJobRequest: SearchJobRequest!) {
     searchJobCardsByLocation(searchJobRequest: $searchJobRequest) {
@@ -50,36 +49,36 @@ const query = `
 `;
 
 const variables = {
-    searchJobRequest: {
-      locale: "en-GB",
-      country: "United Kingdom",
-      keyWords: "",
-      geoQueryClause: {
-        lat: 51.924491609412,
-        lng: -0.487100640539,
-        unit: "mi",
-        distance: 500,
-      },
-      equalFilters: [],
-      consolidateSchedule: true,
-      containFilters: [
-        {
-          key: "isPrivateSchedule",
-          val: ["true", "false"],
-        },
-      ],
-      dateFilters: [],
-      orFilters: [],
-      pageSize: 100,
-      rangeFilters: [],
-      sorters: [
-        {
-          fieldName: "totalPayRateMax",
-          ascending: false,
-        },
-      ],
+  searchJobRequest: {
+    locale: "en-GB",
+    country: "United Kingdom",
+    keyWords: "",
+    geoQueryClause: {
+      lat: 51.924491609412,
+      lng: -0.487100640539,
+      unit: "mi",
+      distance: 200,
     },
-  };
+    equalFilters: [],
+    consolidateSchedule: true,
+    containFilters: [
+      {
+        key: "isPrivateSchedule",
+        val: ["true", "false"],
+      },
+    ],
+    dateFilters: [],
+    orFilters: [],
+    pageSize: 100,
+    rangeFilters: [],
+    sorters: [
+      {
+        fieldName: "totalPayRateMax",
+        ascending: false,
+      },
+    ],
+  },
+};
 
 const fetchData = async () => {
   try {
@@ -114,7 +113,6 @@ const fetchData = async () => {
         },
       }
     );
-
     const data = response.data;
     const jobDetails = data?.data?.searchJobCardsByLocation?.jobCards.map(
       (job) => ({
@@ -123,54 +121,52 @@ const fetchData = async () => {
         postalCode: job.postalCode
       })
     );
-
     let message = "\n--- New Job Listings ---\n";
     jobDetails.forEach((detail, index) => {
               message += `${index + 1}) Location: ${detail.locationName},\nJobType: ${
         detail.jobType
       },\nPostCode: ${detail.postalCode} \n\n`;
     });
-
     return message;
   } catch (error) {
     console.error("Error:", error);
     return null;
   }
 };
-
-const main = async () => {
-  const message = await fetchData();
-  if (message.includes("1)")) {
-    var qs = require('qs');
-    var data = qs.stringify({
-      "token": "k0mj5og30kwyy5sh",
-      "to": "120363283707162796@g.us",
-      "body": message,
-      "priority": 10,
-      "referenceId": "",
-      "msgId": "",
-      "mentions": ""
-    });
-
-    var config = {
-      method: 'post',
-      url: 'https://api.ultramsg.com/instance86547/messages/chat',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: data
-    };
-
-    axios(config)
-      .then(function (response) {
-        console.log(JSON.stringify(response.data));
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  } else {
-    console.log("No data")
-  }
+const main = async()=>{
+    const message = await fetchData();
+    if(message.includes("1)")){
+        var qs = require('qs');
+        var data = qs.stringify({
+            "token": "k0mj5og30kwyy5sh",
+            "to": "120363283707162796@g.us",
+            "body": message,
+            "priority": 10,
+            "referenceId": "",
+            "msgId": "",
+            "mentions": ""
+        });
+        
+        var config = {
+            method: 'post',
+            url: 'https://api.ultramsg.com/instance86547/messages/chat',
+            headers: {  
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+          };
+          
+          axios(config)
+          .then(function (response) {
+            console.log(JSON.stringify(response.data));
+            setTimeout(main, 60000);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }else{
+        console.log("No data")
+        setTimeout(main, 60000);
+    }   
 }
-
-main();
+main()
