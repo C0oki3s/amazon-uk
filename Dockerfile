@@ -26,4 +26,4 @@ RUN crontab /usr/src/app/cron-job
 RUN touch /var/log/cron.log
 
 # Run the command on container startup
-CMD crond && tail -f /var/log/cron.log
+CMD crond -f -l 2 && tail -f /var/log/cron.log
