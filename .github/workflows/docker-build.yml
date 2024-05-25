@@ -1,49 +1,44 @@
-name: Docker Build and Run
+name: amazonJob
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '0 */2 * * *' # Runs every 2 hours
+  workflow_dispatch:
 
 jobs:
-  build:
+  docker-job:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout the repo
+        uses: actions/checkout@v2
 
-    - name: Build Docker image
-      run: docker build -t rohith709370/amz .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Log in to Docker Hub
-      env:
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_USERNAME: rohith709370
-      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - name: Build Docker image
+        run: docker build -t rohith709370/amz .
 
-    - name: Push Docker image to Docker Hub
-      run: docker push rohith709370/amz:latest
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USERNAME: rohith709370
+        run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
-  deploy:
-    runs-on: ubuntu-latest
+      - name: Push Docker image to Docker Hub
+        run: docker push rohith709370/amz:latest
 
-    needs: build
+      - name: Stop and remove existing container
+        run: |
+          docker stop amz_container || true
+          docker rm amz_container || true
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Run Docker container with latest image
+        run: docker run -d --name amz_container rohith709370/amz:latest
 
-    - name: Log in to Docker Hub
-      env:
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_USERNAME: rohith709370
-      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - name: Wait for the container to start
+        run: sleep 10
 
-    - name: Pull Docker image from Docker Hub
-      run: docker pull rohith709370/amz:latest
-
-    - name: Run Docker container continuously
-      run: |
-        docker run -d --name amz_container rohith709370/amz:latest
-        (crontab -l 2>/dev/null; echo "0 */4 * * * docker start amz_container || true") | crontab -
+      - name: Fetch and display Docker logs
+        run: docker logs -f amz_container
