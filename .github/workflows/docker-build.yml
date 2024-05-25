@@ -1,0 +1,47 @@
+name: Docker Build and Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build -t amz .
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: "rohith709370"
+        password: "Sairohith@9"
+
+    - name: Push Docker image to Docker Hub
+      run: docker push amz
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    needs: build
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: "rohith709370"
+        password: "Sairohith@9"
+
+    - name: Pull Docker image from Docker Hub
+      run: docker pull amz
+
+    - name: Run Docker container
+      run: docker run amz
