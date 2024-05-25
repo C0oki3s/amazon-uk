@@ -17,7 +17,10 @@ jobs:
       run: docker build -t rohith709370/amz .
 
     - name: Log in to Docker Hub
-      run: echo "dckr_pat_M7LxUtwkxzD2KNo9BrIqAo1y7R0" | docker login -u rohith709370 --password-stdin
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: rohith709370
+      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
     - name: Push Docker image to Docker Hub
       run: docker push rohith709370/amz:latest
@@ -32,10 +35,15 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Log in to Docker Hub
-      run: echo "dckr_pat_M7LxUtwkxzD2KNo9BrIqAo1y7R0" | docker login -u rohith709370 --password-stdin
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: rohith709370
+      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
     - name: Pull Docker image from Docker Hub
       run: docker pull rohith709370/amz:latest
 
-    - name: Run Docker container
-      run: docker run rohith709370/amz:latest
+    - name: Run Docker container continuously
+      run: |
+        docker run -d --name amz_container rohith709370/amz:latest
+        (crontab -l 2>/dev/null; echo "0 */4 * * * docker start amz_container || true") | crontab -
