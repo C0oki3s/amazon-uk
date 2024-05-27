@@ -1,4 +1,6 @@
 const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 const query = `
   query searchJobCardsByLocation($searchJobRequest: SearchJobRequest!) {
     searchJobCardsByLocation(searchJobRequest: $searchJobRequest) {
@@ -118,55 +120,96 @@ const fetchData = async () => {
       (job) => ({
         locationName: job.locationName,
         jobType: job.jobType,
-        postalCode: job.postalCode
+        postalCode: job.postalCode,
       })
     );
     let message = "\n--- New Job Listings ---\n";
     jobDetails.forEach((detail, index) => {
-              message += `${index + 1}) Location: ${detail.locationName},\nJobType: ${
+      message += `${index + 1}) Location: ${detail.locationName},\nJobType: ${
         detail.jobType
       },\nPostCode: ${detail.postalCode} \n\n`;
     });
-    return message;
+    return { message, jobDetails };
   } catch (error) {
     console.error("Error:", error);
     return null;
   }
 };
-const main = async()=>{
-    const message = await fetchData();
-    if(message.includes("1)")){
-        var qs = require('qs');
-        var data = qs.stringify({
-          token: process.env.TOKEN,
-          to: process.env.TO,
-          body: message,
-          priority: 10,
-          referenceId: "",
-          msgId: "",
-          mentions: "",
-        });
-        
-        var config = {
-            method: 'post',
-            url: 'https://api.ultramsg.com/instance86547/messages/chat',
-            headers: {  
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            data : data
-          };
-          
-          axios(config)
-          .then(function (response) {
-            console.log(JSON.stringify(response.data));
-            setTimeout(main, 60000);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-    }else{
-        console.log("No data")
-        setTimeout(main, 60000);
-    }   
-}
-main()
+
+const checkAndUpdateFile = (jobDetails) => {
+  const filePath = path.resolve(__dirname, "job_counts.json");
+  const now = new Date();
+  let jobCounts = {};
+
+  if (fs.existsSync(filePath)) {
+    jobCounts = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  }
+
+  let exceeded = false;
+
+  jobDetails.forEach((job) => {
+    if (!jobCounts[job.postalCode]) {
+      jobCounts[job.postalCode] = [];
+    }
+    // Filter out timestamps older than 6 hours
+    jobCounts[job.postalCode] = jobCounts[job.postalCode].filter(
+      (timestamp) => now - new Date(timestamp) < 6 * 60 * 60 * 1000
+    );
+
+    if (jobCounts[job.postalCode].length >= 5) {
+      exceeded = true;
+    } else {
+      jobCounts[job.postalCode].push(now.toISOString());
+    }
+  });
+
+  fs.writeFileSync(filePath, JSON.stringify(jobCounts, null, 2));
+
+  return exceeded;
+};
+
+const sendMessage = async (message) => {
+  var qs = require("qs");
+  var data = qs.stringify({
+    token: process.env.TOKEN,
+    to: process.env.TO,
+    body: message,
+    priority: 10,
+    referenceId: "",
+    msgId: "",
+    mentions: "",
+  });
+
+  var config = {
+    method: "post",
+    url: "https://api.ultramsg.com/instance86547/messages/chat",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    data: data,
+  };
+
+  axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+};
+
+const main = async () => {
+  const { message, jobDetails } = await fetchData();
+  if (jobDetails && jobDetails.length > 0) {
+    if (!checkAndUpdateFile(jobDetails)) {
+      await sendMessage(message);
+    } else {
+      console.log("Exceed Message count in 6 hours");
+    }
+  } else {
+    console.log("No data");
+  }
+  setTimeout(main, 60000);
+};
+
+main();
