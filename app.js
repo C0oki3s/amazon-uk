@@ -157,6 +157,7 @@ const checkAndUpdateFile = (jobDetails) => {
     );
 
     if (jobCounts[job.postalCode].length >= 5) {
+      console.log(jobCounts[job.postalCode]);
       exceeded = true;
     } else {
       jobCounts[job.postalCode].push(now.toISOString());
