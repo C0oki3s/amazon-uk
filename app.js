@@ -59,7 +59,7 @@ const variables = {
       lat: 51.924491609412,
       lng: -0.487100640539,
       unit: "mi",
-      distance: 60,
+      distance: 30,
     },
     equalFilters: [],
     consolidateSchedule: true,
@@ -195,6 +195,25 @@ const sendMessage = async (message) => {
       console.log(JSON.stringify(response.data));
     })
     .catch(function (error) {
+      var data = qs.stringify({
+        token: process.env.TOKEN,
+      });
+      var config = {
+        method: "post",
+        url: "https://api.ultramsg.com/instance86688/instance/restart",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        data: data,
+      };
+
+      axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       console.log(error);
     });
 };
