@@ -183,7 +183,7 @@ const sendMessage = async (message) => {
 
   var config = {
     method: "post",
-    url: "https://api.ultramsg.com/instance86547/messages/chat",
+    url: "https://api.ultramsg.com/instance86688/messages/chat",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
