@@ -118,17 +118,34 @@ const fetchData = async () => {
     const data = response.data;
     const jobDetails = data?.data?.searchJobCardsByLocation?.jobCards.map(
       (job) => ({
+        jobId: job.jobId,
+        jobTitle: job.jobTitle,
         locationName: job.locationName,
-        jobType: job.jobType,
+        city: job.city,
+        state: job.state,
         postalCode: job.postalCode,
+        employmentType: job.employmentType,
+        employmentTypeL10N: job.employmentTypeL10N,
+        jobType: job.jobType,
+        jobTypeL10N: job.jobTypeL10N,
+        totalPayRateMin: job.totalPayRateMin,
+        totalPayRateMax: job.totalPayRateMax,
+        currencyCode: job.currencyCode,
       })
     );
-    let message = "\n--- New Job Listings ---\n";
+
+    let message = `**New Job Listings in your specified location**\n\n`;
     jobDetails.forEach((detail, index) => {
-      message += `${index + 1}) Location: ${detail.locationName},\nJobType: ${
-        detail.jobType
-      },\nPostCode: ${detail.postalCode} \n\n`;
+      message += `**${index + 1}. ${detail.jobTitle}**\n`;
+      message += `Location: ${detail.locationName}, ${detail.city}, ${detail.state}, ${detail.postalCode}\n`;
+      message += `Employment Type: ${
+        detail.employmentTypeL10N || detail.employmentType
+      }\n`;
+      message += `Job Type: ${detail.jobTypeL10N || detail.jobType}\n`;
+      message += `Pay: ${detail.currencyCode} ${detail.totalPayRateMin} - ${detail.totalPayRateMax}\n`;
+      message += `---\n`;
     });
+
     return { message, jobDetails };
   } catch (error) {
     console.error("Error:", error);
@@ -170,52 +187,24 @@ const checkAndUpdateFile = (jobDetails) => {
 };
 
 const sendMessage = async (message) => {
-  var qs = require("qs");
-  var data = qs.stringify({
-    token: process.env.TOKEN,
-    to: process.env.TO,
-    body: message,
-    priority: 10,
-    referenceId: "",
-    msgId: "",
-    mentions: "",
-  });
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
-  var config = {
-    method: "post",
-    url: "https://api.ultramsg.com/instance86688/messages/chat",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    data: data,
-  };
-
-  axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error) {
-      var data = qs.stringify({
-        token: process.env.TOKEN,
-      });
-      var config = {
-        method: "post",
-        url: "https://api.ultramsg.com/instance86688/instance/restart",
+  try {
+    const response = await axios.post(
+      webhookUrl,
+      {
+        content: message,
+      },
+      {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        data: data,
-      };
-
-      axios(config)
-        .then(function (response) {
-          console.log(JSON.stringify(response.data));
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      console.log(error);
-    });
+      }
+    );
+    console.log(JSON.stringify(response.data));
+  } catch (error) {
+    console.error("Error:", error);
+  }
 };
 
 const main = async () => {
