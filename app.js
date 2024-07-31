@@ -132,8 +132,7 @@ const fetchData = async () => {
         totalPayRateMax: job.totalPayRateMax,
         currencyCode: job.currencyCode,
       })
-    );
-
+    ).filter((job) => job.jobTitle !== "Remote Customer Service Associate");
     let message = `**New Job Listings in your specified location**\n\n`;
     jobDetails.forEach((detail, index) => {
       message += `**${index + 1}. ${detail.jobTitle}**\n`;
@@ -145,7 +144,6 @@ const fetchData = async () => {
       message += `Pay: ${detail.currencyCode} ${detail.totalPayRateMin} - ${detail.totalPayRateMax}\n`;
       message += `---\n`;
     });
-
     return { message, jobDetails };
   } catch (error) {
     console.error("Error:", error);
