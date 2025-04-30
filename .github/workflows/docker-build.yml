@@ -6,7 +6,7 @@ on:
       - main
   schedule:
     - cron: '0 */6 * * *'  # Run every 6 hours
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   fetch-jobs:
@@ -14,12 +14,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4  # Updated to latest version
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4  # Updated to latest version
         with:
-          node-version: '20.15.1' 
+          node-version: '20.15.1'
 
       - name: Install dependencies
         run: npm install
@@ -27,4 +27,4 @@ jobs:
       - name: Run the job fetcher script
         run: node app.js
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}  # Updated to use DISCORD_TOKEN
