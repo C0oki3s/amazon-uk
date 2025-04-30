@@ -219,4 +219,4 @@ const main = async () => {
   setTimeout(main, 60000);
 };
 
-main();
+main(); //main
