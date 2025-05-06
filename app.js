@@ -190,30 +190,6 @@ const sendMessage = async (message) => {
   const webhookUrl =
     "https://discord.com/api/webhooks/1369292480981237942/-hXOF2MRqzpTHFr2oeOiLn5qjsBtlJu9-7C3U--7Pn7bNeyemGnE2OKh4cnhywjuNY7I";
 
-  const sendMessage = async (message) => {
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-    if (!webhookUrl) {
-      console.error("Error: DISCORD_WEBHOOK_URL is not defined");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        webhookUrl,
-        {
-          content: message,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log(JSON.stringify(response.data));
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
   try {
     const response = await axios.post(
       webhookUrl,
